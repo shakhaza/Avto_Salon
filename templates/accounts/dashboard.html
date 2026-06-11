@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block title %} | Dashboard {% endblock %}
+{% block content %}
+{% load custom_tags %}
+
+<!-- Sub banner start -->
+<!-- Log on to codeastro.com for more projects -->
+<div class="sub-banner overview-bgi">
+    <div class="container breadcrumb-area">
+        <div class="breadcrumb-areas">
+            <h1>Dashboard</h1>
+            <ul class="breadcrumbs">
+                <li><a href="{% url 'home' %}">Home</a></li>
+                <li class="active">{{user.first_name}}</li>
+            </ul>
+        </div>
+    </div>
+</div>
+<!-- Sub Banner end -->
+<!-- Log on to codeastro.com for more projects -->
+
+<!--   Dashboard Start   -->
+
+<div class="container mt-50 mb-50">
+  {% include 'includes/messages.html' %}
+	<div class="main-title" style="text-align:left !important;">
+            <h1>Welcome <span>{{user.first_name}} {{user.last_name}},</span></h1>
+        </div>
+
+        <div class="row mb-40">
+          <div class="col-md-4">
+            <div class="card text-white bg-primary mb-3">
+              <div class="card-body">
+                <h5 class="card-title">Total Spent</h5>
+                <p class="card-text h3">{{ total_spent | price_format }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card text-white bg-success mb-3">
+              <div class="card-body">
+                <h5 class="card-title">Cars Owned</h5>
+                <p class="card-text h3">{{ cars_count }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card text-white bg-info mb-3">
+              <div class="card-body">
+                <h5 class="card-title">Monthly Installments</h5>
+                <p class="card-text h3">{{ monthly_total | price_format }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-lg-8">
+            <h3>Purchase History</h3>
+            {% if purchases %}
+                <table class="table table-hover table-bordered table-striped">
+                  <thead>
+                  <tr>
+                    <th scope="col">Car Name</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Status</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  {% for purchase in purchases %}
+                    <tr>
+                      <td>{{purchase.car.car_title}}</td>
+                      <td>{{purchase.final_price | price_format}}</td>
+                      <td>{{purchase.get_payment_type_display}}</td>
+                      <td><span class="badge badge-{% if purchase.status == 'PAID' %}success{% else %}warning{% endif %}">{{purchase.get_status_display}}</span></td>
+                    </tr>
+                  {% endfor %}
+                  </tbody>
+                </table>
+            {% else %}
+                <div class="alert alert-primary">You haven't bought any cars yet.</div>
+            {% endif %}
+
+            <h3 class="mt-40">Inquiries</h3>
+            {% if inquiries %}
+                <table class="table table-hover table-bordered table-striped">
+                  <thead>
+                  <tr>
+                    <th scope="col">Car Name</th>
+                    <th scope="col">Location</th>
+                    <th scope="col">Action</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  {% for inquiry in inquiries %}
+                    <tr>
+                      <td>{{inquiry.car_title}}</td>
+                      <td>{{inquiry.city}}</td>
+                      <td><a href="{% url 'car_detail' inquiry.car_id %}" class="btn btn-dark">View Car</a></td>
+                    </tr>
+                  {% endfor %}
+                  </tbody>
+                </table>
+            {% else %}
+                <div class="alert alert-primary">You have no inquiries!!</div>
+            {% endif %}
+          </div>
+
+          <div class="col-lg-4">
+            <div class="card">
+              <div class="card-header bg-dark text-white">
+                Bank Card Info
+              </div>
+              <div class="card-body">
+                <form action="{% url 'update_profile' %}" method="POST">
+                  {% csrf_token %}
+                  <div class="form-group">
+                    <label>Card Number</label>
+                    <input type="text" name="card_number" class="form-control" value="{{ user.profile.card_number }}" placeholder="XXXX XXXX XXXX XXXX" required>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label>Expiry Date</label>
+                        <input type="text" name="card_expiry" class="form-control" value="{{ user.profile.card_expiry }}" placeholder="MM/YY" required>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label>CVV (Hidden)</label>
+                        <input type="password" class="form-control" value="***" readonly>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label>Card Holder Name</label>
+                    <input type="text" name="card_holder" class="form-control" value="{{ user.profile.card_holder }}" placeholder="Full Name" required>
+                  </div>
+                  <button type="submit" class="btn btn-primary btn-block">Update Card</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+</div>
+
+<!--   Dashboard End   -->
+
+{% endblock %}
